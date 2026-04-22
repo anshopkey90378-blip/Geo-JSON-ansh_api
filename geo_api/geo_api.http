@@ -1,0 +1,50 @@
+@geo_api_HostAddress = https://localhost:7079/
+
+GET https://localhost:7079/api/shipment
+
+###
+
+GET https://localhost:7079/api/shipment/near
+
+### 
+
+POST https://localhost:7079/api/shipment/seed
+
+
+###
+POST https://localhost:7079/api/shipment
+Content-Type : application/JSON
+
+
+{
+  "trackingNumber": "TRK-001",
+  "metaData": {
+    "customerId": "C123",
+    "customerName": "Rahul Sharma",
+    "shippingAddress": "Sector 12, Noida, UP",
+    "Productname": "Laptop",
+    "Category": "Electronics",
+    "Price": 75000,
+    "IsFragile": true,
+    "status": "In Transit"
+  },
+  "currentLoc": {
+    "longitude": 77.391,
+    "latitude": 28.535
+  }
+}
+
+###
+
+DELETE https://localhost:7079/api/shipment/69e8b46a293651f1b6952058
+
+###
+
+POST https://localhost:7079/api/shipment/location?id=69e88499ff4d1ec1d50ad5bc
+Content-Type : application/JSON
+
+{
+  "longitude": 77.000,
+  "latitude": 25.555
+}
+
