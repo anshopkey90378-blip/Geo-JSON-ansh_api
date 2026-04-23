@@ -40,15 +40,28 @@ DELETE https://localhost:7079/api/shipment/69e8b46a293651f1b6952058
 
 ###
 
-POST https://localhost:7079/api/shipment/location?id=69e88499ff4d1ec1d50ad5bc
+POST https://localhost:7079/api/shipment/location/by-id?id=69e88499ff4d1ec1d50ad5bc
 Content-Type : application/JSON
 
 {
-  "longitude": 77.000,
-  "latitude": 25.555
+  "longitude": -74.0404,
+  "latitude": 40.6780
+}
+
+###
+POST https://localhost:7079/api/shipment/location/by-track?trackNum=TRK1004
+Content-Type : application/JSON
+
+{
+  "longitude": -73.9968,
+  "latitude": 42.9208
 }
 
 ###
 
 GET https://localhost:7079/api/shipment/by-distance?lon=-74.0060&lat=40.7128
 
+###
+GET https://localhost:7079/api/shipment/speeding-alerts?speedLimit=60
+
+###

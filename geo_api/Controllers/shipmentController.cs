@@ -14,6 +14,16 @@ namespace geo_api.Controllers
     public class shipmentController : ControllerBase
     {
         private readonly mongoService _shipmentService;
+        private double calculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            var d1 = lat1 * (Math.PI / 180.0);
+            var num1 = lon1 * (Math.PI / 180.0);
+            var d2 = lat2 * (Math.PI / 180.0);
+            var num2 = lon2 * (Math.PI / 180.0) - num1;
+            var d3 = Math.Pow(Math.Sin((d2 - d1) / 2.0), 2.0)
+                     + Math.Cos(d1) * Math.Cos(d2) * Math.Pow(Math.Sin(num2 / 2.0), 2.0);
+            return 6371 * (2.0 * Math.Atan2(Math.Sqrt(d3), Math.Sqrt(1.0 - d3)));
+        }
 
         public shipmentController(mongoService shipmentService)
         {
@@ -93,6 +103,31 @@ namespace geo_api.Controllers
             return Ok(results);
         }
 
+        [HttpGet("speeding-alerts")]
+        public async Task<IActionResult> GetspeedAlerts(double speedLimit)
+        {
+            if (speedLimit <= 0)
+            {
+                return BadRequest($"Speed Limit {speedLimit} must be grater than zero.");
+            }
+
+
+            var shipments = await _shipmentService.Shipments.AsQueryable().Where(s => s.routeHistory.Count >= 2).ToListAsync();
+            var alerts = shipments.Where(q =>
+            {
+                var last = q.routeHistory.OrderByDescending(g => g.timestamp).First();
+                var previous = q.routeHistory.OrderByDescending(g => g.timestamp).Skip(1).First();
+                
+                double hour = (last.timestamp - previous.timestamp).TotalHours;
+                if (hour < 0) return false;
+
+                double distence = calculateDistance(last.Lat, last.Long, previous.Lat, previous.Long);
+
+                return (distence/hour) >= speedLimit;
+            }).ToList();
+            return Ok(alerts);
+        }
+
         [HttpGet("near")]
         public async Task<IActionResult> GetShipmentsNearMe(double Lat, double Long, double radius)
         {
@@ -122,7 +157,7 @@ namespace geo_api.Controllers
             return Ok(shipment);
         }
 
-        [HttpPost("location")]
+        [HttpPost("location/by-id")]
         public async Task<IActionResult> AddLocation(string id, [FromBody] LocationInput newLoc)
         {
             var shipment = await _shipmentService.Shipments.AsQueryable().Where(s => s.Id == id).FirstOrDefaultAsync();
@@ -141,6 +176,28 @@ namespace geo_api.Controllers
 
             await _shipmentService.Shipments.UpdateOneAsync(s => s.Id == id, update);
             var updated = await _shipmentService.Shipments.AsQueryable().Where(s => s.Id == id).Select(s => s.routeHistory).FirstOrDefaultAsync();
+            return Ok(updated);
+        }
+
+        [HttpPost("location/by-track")]
+        public async Task<IActionResult> AddLocationbytrack(string trackNum, [FromBody] LocationInput newLoc)
+        {
+            var shipment = await _shipmentService.Shipments.AsQueryable().Where(s => s.trackingNumber == trackNum).FirstOrDefaultAsync();
+
+            if (shipment is null)
+                return NotFound("Shipment not found.");
+
+            var log = new movementLog
+            {
+                timestamp = DateTime.UtcNow,
+                Long = newLoc.Longitude,
+                Lat = newLoc.Latitude
+            };
+
+            var update = Builders<Shipment>.Update.Push(s => s.routeHistory, log).Set(s => s.currentLoc, GeoJson.Point(new GeoJson2DGeographicCoordinates(newLoc.Longitude, newLoc.Latitude)));
+
+            await _shipmentService.Shipments.UpdateOneAsync(s => s.trackingNumber == trackNum, update);
+            var updated = await _shipmentService.Shipments.AsQueryable().Where(s => s.trackingNumber == trackNum).Select(s => s.routeHistory).FirstOrDefaultAsync();
             return Ok(updated);
         }
 
