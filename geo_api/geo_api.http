@@ -17,20 +17,20 @@ Content-Type : application/JSON
 
 
 {
-  "trackingNumber": "TRK-001",
+  "trackingNumber": "TRK-1112",
   "metaData": {
-    "customerId": "C123",
-    "customerName": "Rahul Sharma",
-    "shippingAddress": "Sector 12, Noida, UP",
-    "Productname": "Laptop",
-    "Category": "Electronics",
+    "customerId": "C212",
+    "customerName": "Mahual Sharma",
+    "shippingAddress": "Sector -18, rohini, Delhi",
+    "Productname": "Laptop Bag",
+    "Category": "Accessories",
     "Price": 75000,
-    "IsFragile": true,
-    "status": "In Transit"
+    "IsFragile": false,
+    "status": "Delay"
   },
   "currentLoc": {
-    "longitude": 77.391,
-    "latitude": 28.535
+    "longitude": 77.010,
+    "latitude": 29.595
   }
 }
 
@@ -47,4 +47,8 @@ Content-Type : application/JSON
   "longitude": 77.000,
   "latitude": 25.555
 }
+
+###
+
+GET https://localhost:7079/api/shipment/by-distance?lon=-74.0060&lat=40.7128
 

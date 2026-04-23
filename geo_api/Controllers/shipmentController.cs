@@ -1,6 +1,7 @@
 using geo_api.Model;
 using geo_api.Services;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
 using MongoDB.Driver.Linq;
@@ -70,6 +71,28 @@ namespace geo_api.Controllers
             return Ok(shipment);
         }
 
+        [HttpGet("by-distance")]
+        public async Task<IActionResult> GetShipmentsByDistance([FromQuery] double lon, [FromQuery] double lat)
+        {
+            if (lon < -180 || lon > 180 || lat < -90 || lat > 90)
+            {
+                return BadRequest("Invalid coordinates. Longitude must be -180–180, latitude -90–90.");
+            }
+
+            var warehousePoint = GeoJson.Point(GeoJson.Geographic(lon, lat));
+
+            var results = await _shipmentService.Shipments.Aggregate()
+                .AppendStage<Shipment>(new BsonDocument("$geoNear", new BsonDocument
+                {
+                    { "near", warehousePoint.ToBsonDocument() },
+                    { "distanceField", "DistanceFromWarehouse" },
+                    { "spherical", true },
+                    { "distanceMultiplier", 0.001 }
+                })).ToListAsync();
+
+            return Ok(results);
+        }
+
         [HttpGet("near")]
         public async Task<IActionResult> GetShipmentsNearMe(double Lat, double Long, double radius)
         {
@@ -120,6 +143,8 @@ namespace geo_api.Controllers
             var updated = await _shipmentService.Shipments.AsQueryable().Where(s => s.Id == id).Select(s => s.routeHistory).FirstOrDefaultAsync();
             return Ok(updated);
         }
+
+
 
 
         [HttpPost("seed")]

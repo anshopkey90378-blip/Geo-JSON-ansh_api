@@ -13,6 +13,7 @@ namespace geo_api.Model
         public shipmentMetadata metaData { get; set; }
         public GeoJsonPoint<GeoJson2DGeographicCoordinates> currentLoc { get; set; }
         public List<movementLog> routeHistory { get; set; } = new();
+        public double DistanceFromWarehouse { get; set; }
     }
 
     public class shipmentMetadata
