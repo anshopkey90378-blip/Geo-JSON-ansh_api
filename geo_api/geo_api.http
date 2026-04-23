@@ -6,31 +6,27 @@ GET https://localhost:7079/api/shipment
 
 GET https://localhost:7079/api/shipment/near
 
-### 
-
-POST https://localhost:7079/api/shipment/seed
-
-
+###
 ###
 POST https://localhost:7079/api/shipment
 Content-Type : application/JSON
 
 
 {
-  "trackingNumber": "TRK-1112",
+  "trackingNumber": "TRK-1222",
   "metaData": {
-    "customerId": "C212",
-    "customerName": "Mahual Sharma",
-    "shippingAddress": "Sector -18, rohini, Delhi",
-    "Productname": "Laptop Bag",
+    "customerId": "C222",
+    "customerName": "Sharma",
+    "shippingAddress": "Sector -12, rohini, Delhi",
+    "Productname": "Laptop skin",
     "Category": "Accessories",
-    "Price": 75000,
+    "Price": 750,
     "IsFragile": false,
     "status": "Delay"
   },
   "currentLoc": {
-    "longitude": 77.010,
-    "latitude": 29.595
+    "longitude": 70.010,
+    "latitude": 30.595
   }
 }
 
@@ -39,13 +35,16 @@ Content-Type : application/JSON
 DELETE https://localhost:7079/api/shipment/69e8b46a293651f1b6952058
 
 ###
+DELETE https://localhost:7079/api/shipment/clean
+
+###
 
 POST https://localhost:7079/api/shipment/location/by-id?id=69e88499ff4d1ec1d50ad5bc
 Content-Type : application/JSON
 
 {
   "longitude": -74.0404,
-  "latitude": 40.6780
+  "latitude": 50.6780
 }
 
 ###
@@ -53,7 +52,7 @@ POST https://localhost:7079/api/shipment/location/by-track?trackNum=TRK1004
 Content-Type : application/JSON
 
 {
-  "longitude": -73.9968,
+  "longitude": -74.9968,
   "latitude": 42.9208
 }
 
@@ -62,6 +61,5 @@ Content-Type : application/JSON
 GET https://localhost:7079/api/shipment/by-distance?lon=-74.0060&lat=40.7128
 
 ###
-GET https://localhost:7079/api/shipment/speeding-alerts?speedLimit=60
-
+GET https://localhost:7079/api/shipment/speeding-alerts?speedLimit=80
 ###

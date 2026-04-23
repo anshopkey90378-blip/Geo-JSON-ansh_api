@@ -104,7 +104,7 @@ namespace geo_api.Controllers
         }
 
         [HttpGet("speeding-alerts")]
-        public async Task<IActionResult> GetspeedAlerts(double speedLimit)
+        public async Task<IActionResult> GetspeedAlerts([FromQuery] double speedLimit)
         {
             if (speedLimit <= 0)
             {
@@ -119,7 +119,7 @@ namespace geo_api.Controllers
                 var previous = q.routeHistory.OrderByDescending(g => g.timestamp).Skip(1).First();
                 
                 double hour = (last.timestamp - previous.timestamp).TotalHours;
-                if (hour < 0) return false;
+                if (hour < 0.010) return false;
 
                 double distence = calculateDistance(last.Lat, last.Long, previous.Lat, previous.Long);
 
@@ -202,32 +202,6 @@ namespace geo_api.Controllers
         }
 
 
-
-
-        [HttpPost("seed")]
-        public async Task<IActionResult> SeedData()
-        {
-            var samples = new List<Shipment>
-            {
-                new Shipment { trackingNumber = "TRK1001", currentLoc = GeoJson.Point(GeoJson.Geographic(-74.0404, 40.6780)) },
-                new Shipment { trackingNumber = "TRK1002", currentLoc = GeoJson.Point(GeoJson.Geographic(-73.9968, 40.6708)) },
-                new Shipment { trackingNumber = "TRK1003", currentLoc = GeoJson.Point(GeoJson.Geographic(-74.0501, 40.7099)) },
-                new Shipment { trackingNumber = "TRK1004", currentLoc = GeoJson.Point(GeoJson.Geographic(-74.0328, 40.7279)) },
-                new Shipment { trackingNumber = "TRK1005", currentLoc = GeoJson.Point(GeoJson.Geographic(-73.9729, 40.7253)) },
-                new Shipment { trackingNumber = "TRK1006", currentLoc = GeoJson.Point(GeoJson.Geographic(-74.0168, 40.7145)) },
-                new Shipment { trackingNumber = "TRK1007", currentLoc = GeoJson.Point(GeoJson.Geographic(-73.9966, 40.6847)) },
-                new Shipment { trackingNumber = "TRK1008", currentLoc = GeoJson.Point(GeoJson.Geographic(-74.0004, 40.7017)) },
-                new Shipment { trackingNumber = "TRK1009", currentLoc = GeoJson.Point(GeoJson.Geographic(-74.0345, 40.7289)) },
-                new Shipment { trackingNumber = "TRK1010", currentLoc = GeoJson.Point(GeoJson.Geographic(-74.0203, 40.7069)) }
-            };
-            samples[0].routeHistory.Add(new movementLog { timestamp = DateTime.UtcNow, Long = -74.0404, Lat = 40.6780 });
-
-            await _shipmentService.Shipments.InsertManyAsync(samples);
-            return Ok("10 samples seeded successfully.");
-        }
-
-
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Deleteshipment(string id)
         {
@@ -238,6 +212,13 @@ namespace geo_api.Controllers
                 NotFound("Shipment not found.");
             }
             return NoContent(); 
+        }
+
+        [HttpDelete("clean")]
+        public async Task<IActionResult> cleanEverything()
+        {
+            await _shipmentService.Shipments.DeleteManyAsync(_ => true);
+            return Ok("All shipment deleted");
         }
 
         //[HttpPost]
